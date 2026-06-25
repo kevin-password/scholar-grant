@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card">
+    <h2>💰 Request Grant Disbursement</h2>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div style="background: #ffdddd; padding: 15px; border-radius: 10px; margin-bottom: 20px; color: #d8000c;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <p>You have earned <strong>UGX {{ profile.total_earned }}</strong> so far.</p>
+    <p>Your current track completion is: <strong>{{ progress|floatformat:1 }}%</strong></p>
+    
+    {% if progress >= 80 %}
+        <div style="background: #d4edda; padding: 20px; border-radius: 10px; margin: 20px 0; color: #155724;">
+            <h3>🎉 Congratulations! You are eligible to withdraw!</h3>
+            <p>You can request your current wallet balance of <strong>UGX {{ profile.wallet_balance }}</strong>.</p>
+            <form method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn" style="background: #2ecc71; font-size: 1.5rem;">Request UGX {{ profile.wallet_balance }}</button>
+            </form>
+        </div>
+    {% else %}
+        <div style="background: #fff3cd; padding: 20px; border-radius: 10px; margin: 20px 0; color: #856404;">
+            <h3>⚠️ Not quite there yet!</h3>
+            <p>You must complete at least <strong>80%</strong> of your reading track before you can withdraw funds. Keep reading!</p>
+        </div>
+    {% endif %}
+
+    <a href="{% url 'dashboard' %}" style="color: #6e8efb;">← Back to Dashboard</a>
+</div>
+{% endblock %}

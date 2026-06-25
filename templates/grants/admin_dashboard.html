@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card">
+    <h2>👨‍🏫 Admin Withdrawal Dashboard</h2>
+    <p>Review student summaries and approve or reject their grant requests.</p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="background: #d4edda; padding: 15px; border-radius: 10px; margin-bottom: 20px; color: #155724;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if pending_requests %}
+        {% for req in pending_requests %}
+        <div style="border: 2px solid #eee; border-radius: 15px; padding: 20px; margin-bottom: 20px; background: #fafafa;">
+            <h3 style="margin-top:0;">{{ req.student.user.username }} requests <span style="color:#2ecc71;">UGX {{ req.amount }}</span></h3>
+            <p><strong>Track:</strong> {{ req.student.current_track.name }} | <strong>Requested:</strong> {{ req.requested_at|date:"M d, Y" }}</p>
+            
+            <h4>📝 Recent Reading Summaries (Verify Quality):</h4>
+            {% for log in req.recent_logs %}
+                <div style="background: white; padding: 15px; border-left: 4px solid #6e8efb; margin-bottom: 10px; border-radius: 5px;">
+                    <strong>{{ log.book.title }}</strong> ({{ log.date_read|date:"M d" }}):
+                    <p style="margin: 5px 0 0 0; color: #555;">{{ log.summary_text|truncatechars:250 }}</p>
+                </div>
+            {% empty %}
+                <p>No recent logs found.</p>
+            {% endfor %}
+
+            <div style="text-align: right; margin-top: 20px;">
+                <a href="{% url 'process_withdrawal' req.id 'reject' %}" class="btn" style="background: #e74c3c; padding: 10px 20px; font-size: 1rem;">❌ Reject</a>
+                <a href="{% url 'process_withdrawal' req.id 'approve' %}" class="btn" style="background: #2ecc71; padding: 10px 20px; font-size: 1rem; margin-left: 10px;">✅ Approve & Send Funds</a>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div style="text-align: center; padding: 40px;">
+            <h3>No pending withdrawal requests right now.</h3>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

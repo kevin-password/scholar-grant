@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card">
+    <h1>🎓 Welcome, Scholar!</h1>
+    <p>Choose your Reading Track to begin earning your University Grant.</p>
+    
+    <form method="POST">
+        {% csrf_token %}
+        {% for track in tracks %}
+            <div style="margin: 20px 0; padding: 15px; border: 2px solid #eee; border-radius: 10px;">
+                <h3>{{ track.name }} Track</h3>
+                <p>Deposit: UGX {{ track.deposit_amount }} | Total Grant: UGX {{ track.total_grant_value }}</p>
+                <p>Daily Target: {{ track.daily_page_target }} pages</p>
+                <button type="submit" name="track_id" value="{{ track.id }}" class="btn">Select {{ track.name }}</button>
+            </div>
+        {% endfor %}
+    </form>
+</div>
+{% endblock %}

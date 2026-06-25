@@ -1,0 +1,24 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Scholar Reading Grant</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <!-- NEW: Top Navigation Bar -->
+    {% if user.is_authenticated %}
+    <div style="background: #333; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-radius: 10px;">
+        <span>Welcome, <strong>{{ user.username }}</strong> ({{ user.role|capfirst }})</span>
+        <a href="{% url 'logout' %}" style="color: #ff6b6b; text-decoration: none; font-weight: bold;">🚪 Logout</a>
+    </div>
+    {% endif %}
+
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+    <script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if messages %}
+    {% for message in messages %}
+        <div style="background: #ffdddd; padding: 15px; border-radius: 10px; margin-bottom: 20px; color: #d8000c;">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="card wallet-card">
+    <h2>Your Digital Grant Wallet</h2>
+    <h1>UGX <span id="balance-amount">{{ profile.wallet_balance }}</span></h1>
+    <div class="progress-bar-container">
+        <div class="progress-bar" style="width: {{ progress }}%"></div>
+    </div>
+    <p>{{ progress|floatformat:1 }}% to your UGX {{ profile.current_track.total_grant_value }} Grant!</p>
+    <p class="streak">🔥 {{ profile.current_streak }} Day Streak</p>
+</div>
+
+<div class="card" style="display: flex; justify-content: space-around; flex-wrap: wrap;">
+    <a href="{% url 'reading_session' %}" class="btn">Start Reading Session</a>
+    <a href="{% url 'request_withdrawal' %}" class="btn" style="background: #f39c12;">💰 Withdraw Funds</a>
+</div>
+{% endblock %}

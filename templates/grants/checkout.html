@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 0 auto;">
+    <h2 style="text-align:center;">🔒 Secure Checkout</h2>
+    <p style="text-align:center; color:#666;">Complete your deposit to activate your track.</p>
+    
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;">
+        <h3 style="margin:0; color: #6e8efb;">{{ track.name }} Track</h3>
+        <p style="font-size: 2rem; font-weight: bold; margin: 10px 0; color: #333;">UGX {{ track.deposit_amount }}</p>
+        <p style="font-size: 0.9rem; color: #888;">One-time deposit | Refundable upon track completion</p>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+        
+        <h4>Select Payment Method:</h4>
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; padding: 15px; border: 2px solid #ddd; border-radius: 10px; margin-bottom: 10px; cursor: pointer;">
+                <input type="radio" name="payment_method" value="mtn_momo" checked style="margin-right: 10px;"> 
+                <strong>MTN Mobile Money</strong> (Recommended)
+            </label>
+            <label style="display: block; padding: 15px; border: 2px solid #ddd; border-radius: 10px; margin-bottom: 10px; cursor: pointer;">
+                <input type="radio" name="payment_method" value="airtel_money" style="margin-right: 10px;"> 
+                <strong>Airtel Money</strong>
+            </label>
+            <label style="display: block; padding: 15px; border: 2px solid #ddd; border-radius: 10px; cursor: pointer;">
+                <input type="radio" name="payment_method" value="card" style="margin-right: 10px;"> 
+                <strong>Visa / Mastercard</strong>
+            </label>
+        </div>
+
+        <div id="mobile-money-fields">
+            <label for="phone_number" style="font-weight: bold;">Mobile Money Phone Number:</label>
+            <input type="text" id="phone_number" name="phone_number" placeholder="e.g., 0771234567" required
+                   style="width: 100%; padding: 12px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 8px; margin-top: 5px; box-sizing: border-box;">
+            <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">A prompt will be sent to your phone to enter your PIN.</p>
+        </div>
+
+        <button type="submit" class="btn" style="width: 100%; font-size: 1.2rem; margin-top: 20px; background: #2ecc71;">
+            💳 Pay UGX {{ track.deposit_amount }} Now
+        </button>
+    </form>
+    
+    <p style="text-align: center; font-size: 0.8rem; color: #999; margin-top: 20px;">
+        🔒 Your payment information is encrypted and secure.
+    </p>
+</div>
+{% endblock %}

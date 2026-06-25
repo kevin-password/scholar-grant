@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card" style="max-width: 400px; margin: 0 auto;">
+    <h2 style="text-align:center;">🎓 Create Student Account</h2>
+    <p style="text-align:center; color:#666;">Sign up to start earning your University Grant.</p>
+    
+    {% if error %}
+        <div style="background: #ffdddd; padding: 10px; color: #d8000c; border-radius: 5px; margin-bottom: 15px; text-align:center;">
+            {{ error }}
+        </div>
+    {% endif %}
+    
+    <form method="POST">
+        {% csrf_token %}
+        <label style="font-weight:bold;">Username:</label>
+        <input type="text" name="username" required style="width:100%; padding:10px; margin-bottom:15px; border-radius:5px; border:1px solid #ddd; box-sizing:border-box;">
+        
+        <label style="font-weight:bold;">Password:</label>
+        <input type="password" name="password" required style="width:100%; padding:10px; margin-bottom:20px; border-radius:5px; border:1px solid #ddd; box-sizing:border-box;">
+        
+        <button type="submit" class="btn" style="width:100%;">Sign Up & Choose Track</button>
+    </form>
+    
+    <p style="text-align:center; margin-top:20px; font-size:0.9rem;">
+        Already have an account? <a href="/admin/" style="color:#6e8efb;">Login here</a>
+    </p>
+</div>
+{% endblock %}
