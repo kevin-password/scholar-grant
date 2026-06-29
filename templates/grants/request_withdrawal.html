@@ -1,36 +1,125 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="card">
-    <h2>💰 Request Grant Disbursement</h2>
+<div class="max-w-2xl mx-auto">
     
+    <!-- Header -->
+    <div class="mb-8">
+        <a href="{% url 'dashboard' %}" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-800 transition mb-4">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            Back to Dashboard
+        </a>
+        <h1 class="text-3xl font-bold text-slate-900">Withdraw Funds</h1>
+        <p class="text-slate-600 mt-2">Request your earnings to be sent to your Mobile Money account.</p>
+    </div>
+
+    <!-- Balance & Progress Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
+        <div class="flex justify-between items-start mb-6">
+            <div>
+                <p class="text-sm font-medium text-slate-500 mb-1">Available Balance</p>
+                <h2 class="text-4xl font-black text-slate-900">UGX {{ profile.wallet_balance|floatformat:0 }}</h2>
+            </div>
+            <div class="text-right">
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Track Progress</p>
+                <p class="text-2xl font-bold text-indigo-600">{{ progress|floatformat:1 }}%</p>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="mb-4">
+            <div class="flex justify-between text-xs font-medium text-slate-600 mb-2">
+                <span>Withdrawal Progress</span>
+                <span class="font-bold">80% Required</span>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                <div class="bg-gradient-to-r from-indigo-500 to-purple-600 h-3 rounded-full transition-all duration-500 {% if progress >= 80 %}shadow-lg shadow-indigo-500/50{% endif %}" 
+                     style="width: {% if progress >= 80 %}100{% else %}{{ progress }}{% endif %}%"></div>
+            </div>
+        </div>
+
+        <p class="text-xs text-slate-500">
+            You have earned <span class="font-bold text-slate-700">UGX {{ profile.total_earned|floatformat:0 }}</span> towards your 
+            <span class="font-bold text-slate-700">UGX {{ profile.current_track.total_grant_value|floatformat:0 }}</span> track goal.
+        </p>
+    </div>
+
+    <!-- Messages -->
     {% if messages %}
         {% for message in messages %}
-            <div style="background: #ffdddd; padding: 15px; border-radius: 10px; margin-bottom: 20px; color: #d8000c;">
-                {{ message }}
+            <div class="mb-6 p-4 rounded-xl border {% if message.tags == 'error' %}bg-red-50 border-red-200 text-red-800{% else %}bg-emerald-50 border-emerald-200 text-emerald-800{% endif %}">
+                <div class="flex items-start gap-3">
+                    {% if message.tags == 'error' %}
+                    <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    {% else %}
+                    <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    {% endif %}
+                    <p class="text-sm font-medium">{{ message }}</p>
+                </div>
             </div>
         {% endfor %}
     {% endif %}
 
-    <p>You have earned <strong>UGX {{ profile.total_earned }}</strong> so far.</p>
-    <p>Your current track completion is: <strong>{{ progress|floatformat:1 }}%</strong></p>
-    
+    <!-- Withdrawal Eligibility -->
     {% if progress >= 80 %}
-        <div style="background: #d4edda; padding: 20px; border-radius: 10px; margin: 20px 0; color: #155724;">
-            <h3>🎉 Congratulations! You are eligible to withdraw!</h3>
-            <p>You can request your current wallet balance of <strong>UGX {{ profile.wallet_balance }}</strong>.</p>
+        <!-- ELIGIBLE TO WITHDRAW -->
+        <div class="bg-gradient-to-br from-emerald-50 to-cyan-50 border-2 border-emerald-200 rounded-2xl p-8 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full mb-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-900 mb-2">Congratulations!</h3>
+            <p class="text-slate-600 mb-6">You've reached the 80% milestone and are eligible to withdraw your earnings.</p>
+            
             <form method="POST">
                 {% csrf_token %}
-                <button type="submit" class="btn" style="background: #2ecc71; font-size: 1.5rem;">Request UGX {{ profile.wallet_balance }}</button>
+                <button type="submit" 
+                        class="w-full bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 transition-all duration-300 flex items-center justify-center gap-2 text-lg">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    Withdraw UGX {{ profile.wallet_balance|floatformat:0 }}
+                </button>
             </form>
+            
+            <p class="mt-4 text-xs text-slate-500">
+                Your funds will be sent to your registered Mobile Money number within 24-48 hours after admin approval.
+            </p>
         </div>
     {% else %}
-        <div style="background: #fff3cd; padding: 20px; border-radius: 10px; margin: 20px 0; color: #856404;">
-            <h3>⚠️ Not quite there yet!</h3>
-            <p>You must complete at least <strong>80%</strong> of your reading track before you can withdraw funds. Keep reading!</p>
+        <!-- NOT YET ELIGIBLE -->
+        <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-8 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-amber-100 text-amber-600 rounded-full mb-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-900 mb-2">Almost There!</h3>
+            <p class="text-slate-600 mb-4">
+                You need to complete at least <span class="font-bold text-slate-900">80%</span> of your reading track before you can withdraw funds.
+            </p>
+            <p class="text-sm text-slate-500 mb-6">
+                Current progress: <span class="font-bold text-amber-600">{{ progress|floatformat:1 }}%</span>
+                <br>
+                You need <span class="font-bold text-slate-900">UGX {{ ugx_needed|floatformat:0 }}</span> more to unlock withdrawals.
+            </p>
+            
+            <a href="{% url 'reading_session' %}" 
+               class="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                Continue Reading
+            </a>
         </div>
     {% endif %}
 
-    <a href="{% url 'dashboard' %}" style="color: #6e8efb;">← Back to Dashboard</a>
+    <!-- Info Box -->
+    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
+        <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <div class="text-sm text-blue-800">
+                <p class="font-semibold mb-1">How Withdrawals Work</p>
+                <p class="text-xs leading-relaxed">
+                    Once you request a withdrawal, our academic team will review your recent reading summaries to verify comprehension. 
+                    Upon approval, your funds will be sent to your Mobile Money account within 24-48 hours.
+                </p>
+            </div>
+        </div>
+    </div>
+
 </div>
 {% endblock %}

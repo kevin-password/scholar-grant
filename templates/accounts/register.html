@@ -13,17 +13,22 @@
     
     <form method="POST">
         {% csrf_token %}
+        
         <label style="font-weight:bold;">Username:</label>
-        <input type="text" name="username" required style="width:100%; padding:10px; margin-bottom:15px; border-radius:5px; border:1px solid #ddd; box-sizing:border-box;">
+        <input type="text" name="username" required style="width:100%; padding:10px; margin-bottom:15px; border-radius:5px; border:1px solid #ddd; box-sizing:border-box;" placeholder="Choose a username">
+        
+        <!-- NEW: Email Field -->
+        <label style="font-weight:bold;">Email Address:</label>
+        <input type="email" name="email" required style="width:100%; padding:10px; margin-bottom:15px; border-radius:5px; border:1px solid #ddd; box-sizing:border-box;" placeholder="you@example.com">
         
         <label style="font-weight:bold;">Password:</label>
-        <input type="password" name="password" required style="width:100%; padding:10px; margin-bottom:20px; border-radius:5px; border:1px solid #ddd; box-sizing:border-box;">
+        <input type="password" name="password" required style="width:100%; padding:10px; margin-bottom:20px; border-radius:5px; border:1px solid #ddd; box-sizing:border-box;" placeholder="Choose a strong password">
         
         <button type="submit" class="btn" style="width:100%;">Sign Up & Choose Track</button>
     </form>
     
     <p style="text-align:center; margin-top:20px; font-size:0.9rem;">
-        Already have an account? <a href="/accounts/login/" style="color:#6e8efb;">Login here</a>
+        Already have an account? <a href="{% url 'login' %}" style="color:#6e8efb;">Login here</a>
     </p>
 </div>
 {% endblock %}

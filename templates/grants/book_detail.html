@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    
+    <!-- Header / Breadcrumb -->
+    <div class="mb-8">
+        <a href="{% url 'reading_session' %}" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-800 transition mb-4">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            Back to Library
+        </a>
+    </div>
+
+    <!-- Main Book Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-0">
+            
+            <!-- Left: Cover Image -->
+            <div class="bg-slate-100 p-8 flex items-center justify-center md:border-r border-slate-200">
+                <img src="{{ book.cover_url }}" alt="{{ book.title }}" class="w-full max-w-[250px] rounded-lg shadow-2xl object-cover" onerror="this.src='https://placehold.co/300x450/e2e8f0/94a3b8?text=No+Cover'">
+            </div>
+
+            <!-- Right: Details -->
+            <div class="md:col-span-2 p-8 sm:p-10 flex flex-col justify-between">
+                <div>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        {% if book.genre %}
+                        <span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">{{ book.genre }}</span>
+                        {% endif %}
+                        <!-- FIX: Changed book.pages to page_count -->
+                        <span class="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider rounded-full">{{ page_count }} Pages</span>
+                    </div>
+
+                    <h1 class="text-3xl sm:text-4xl font-black text-slate-900 leading-tight mb-2">{{ book.title }}</h1>
+                    <p class="text-lg text-slate-500 font-medium mb-6">by {{ book.author }}</p>
+
+                    <div class="mb-8">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Synopsis</h3>
+                        <p class="text-slate-700 leading-relaxed text-base">
+                            {{ book.description|default:"No description available for this book. Open the external reader to learn more!" }}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-slate-100">
+                    <a href="https://openlibrary.org/search?q={{ book.title|urlencode }}" target="_blank" 
+                       class="flex-1 flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        Open External Reader
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Earning Info Box & Submission Form -->
+    <div class="mt-8 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="bg-gradient-to-r from-emerald-50 to-cyan-50 border-b border-emerald-200 p-6 flex items-start gap-4">
+            <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-slate-900 mb-1">Earn UGX {{ book.earned_value }} for this book!</h3>
+                <p class="text-sm text-slate-600">Read this book using the external link above, then paste your summary below to claim your reward instantly.</p>
+            </div>
+        </div>
+
+        <div class="p-6 sm:p-8">
+            <!-- Hidden CSRF Token for JS -->
+            <form id="csrf-form" style="display:none;">{% csrf_token %}</form>
+            
+            <label for="pasted-summary" class="block text-sm font-semibold text-slate-800 mb-2">Your Summary</label>
+            <textarea id="pasted-summary" rows="8" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" placeholder="Paste or type your summary here... (Minimum 100 characters for verification)"></textarea>
+            
+            <div class="flex justify-end pt-4">
+                <button id="submit-summary-btn" data-book-id="{{ book.id }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Submit & Claim Reward
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Inline JS for Submission -->
+<script>
+    document.getElementById('submit-summary-btn').addEventListener('click', function() {
+        const btn = this;
+        const summaryTextarea = document.getElementById('pasted-summary');
+        const pastedText = summaryTextarea.value.trim();
+        const bookId = btn.getAttribute('data-book-id');
+
+        if (pastedText.length < 100) {
+            alert(`Please paste a proper summary! You need at least 100 characters. (You have ${pastedText.length})`);
+            return;
+        }
+        
+        btn.disabled = true;
+        btn.innerText = "Processing...";
+
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        fetch('/api/submit-reading/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ 
+                // FIX: Changed book.pages|default:15 to page_count
+                pages_read: {{ page_count }}, 
+                book_id: bookId,
+                summary_text: pastedText
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = '/'; // Redirect to dashboard to see wallet update
+            } else {
+                alert("Error: " + data.error);
+                btn.disabled = false;
+                btn.innerText = "Submit & Claim Reward";
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("An error occurred. Please try again.");
+            btn.disabled = false;
+            btn.innerText = "Submit & Claim Reward";
+        });
+    });
+</script>
+{% endblock %}

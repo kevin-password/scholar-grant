@@ -1,29 +1,65 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="card" style="max-width: 400px; margin: 0 auto;">
-    <h2 style="text-align:center;">🔐 Scholar Login</h2>
-    <p style="text-align:center; color:#666;">Welcome back! Log in to continue earning.</p>
-    
-    {% if error %}
-        <div style="background: #ffdddd; padding: 10px; color: #d8000c; border-radius: 5px; margin-bottom: 15px; text-align:center;">
-            {{ error }}
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-50 to-slate-100">
+    <div class="max-w-md w-full">
+        
+        <!-- Logo & Header -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 text-white rounded-2xl shadow-xl shadow-indigo-500/30 mb-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+            </div>
+            <h2 class="text-3xl font-bold text-slate-900">Welcome Back</h2>
+            <p class="mt-2 text-slate-600">Sign in to continue earning your university grant</p>
         </div>
-    {% endif %}
-    
-    <form method="POST">
-        {% csrf_token %}
-        <label style="font-weight:bold;">Username:</label>
-        <input type="text" name="username" required style="width:100%; padding:10px; margin-bottom:15px; border-radius:5px; border:1px solid #ddd; box-sizing:border-box;">
-        
-        <label style="font-weight:bold;">Password:</label>
-        <input type="password" name="password" required style="width:100%; padding:10px; margin-bottom:20px; border-radius:5px; border:1px solid #ddd; box-sizing:border-box;">
-        
-        <button type="submit" class="btn" style="width:100%;">Log In</button>
-    </form>
-    
-    <p style="text-align:center; margin-top:20px; font-size:0.9rem;">
-        Don't have an account? <a href="/accounts/register/" style="color:#6e8efb; font-weight:bold;">Sign Up Here</a>
-    </p>
+
+        <!-- Login Card -->
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
+            {% if error %}
+            <div class="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
+                <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <p class="text-sm text-red-800">{{ error }}</p>
+            </div>
+            {% endif %}
+
+            <form method="POST" class="space-y-6">
+                {% csrf_token %}
+                
+                <div>
+                    <label for="username" class="block text-sm font-semibold text-slate-700 mb-2">Username</label>
+                    <input type="text" id="username" name="username" required 
+                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                           placeholder="Enter your username">
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-semibold text-slate-700 mb-2">Password</label>
+                    <input type="password" id="password" name="password" required 
+                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                           placeholder="Enter your password">
+                </div>
+
+                <button type="submit" 
+                        class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 transition-all duration-300">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-sm text-slate-600">
+                    <div class="text-center mt-4">
+    <a href="{% url 'password_reset' %}" class="text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition">Forgot your password?</a>
+</div>
+                    Don't have an account? 
+                    <a href="{% url 'register' %}" class="font-bold text-indigo-600 hover:text-indigo-700 transition">Create one here</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <p class="mt-8 text-center text-xs text-slate-500">
+            Secure login powered by ScholarGrants
+        </p>
+    </div>
 </div>
 {% endblock %}

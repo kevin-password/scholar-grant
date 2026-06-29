@@ -1,8 +1,21 @@
-
+# Virtual Environment
 venv/
+env/
+
+# Python cache
 __pycache__/
-*.pyc
+*.py[cod]
+
+# Local Database (We will create a fresh one on the server)
 db.sqlite3
-*.log
-.DS_Store
-fix_*.py
+db.sqlite3-journal
+
+# Environment variables (Secrets)
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# Static files (We will generate these on the server)
+staticfiles/

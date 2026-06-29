@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-hc8mgtm+5^qs0ldt4$#e$o8-=rj5zhrhi#fp%p15*!w9+jha)e'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False  # MUST be False for live hosting
+DEBUG = True  # MUST be False for live hosting
 ALLOWED_HOSTS = ['*']  # Allows anyone to visit your live URL
 
 # Application definition
@@ -90,3 +90,18 @@ AUTH_USER_MODEL = 'accounts.User'
 
 # Tell Django to use our custom login page instead of the ugly default one
 LOGIN_URL = '/accounts/login/'
+
+# --- REAL EMAIL CONFIGURATION (Gmail SMTP) ---
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+# The Gmail account sending the emails
+EMAIL_HOST_USER = 'scholargrant22@gmail.com' 
+
+# Your 16-character App Password (spaces removed)
+EMAIL_HOST_PASSWORD = 'mcddudfqobkrwbby' 
+
+# How the email will appear in the user's inbox
+DEFAULT_FROM_EMAIL = 'ScholarGrants <scholargrant22@gmail.com>'

@@ -1,56 +1,44 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<form id="csrf-form" style="display:none;">{% csrf_token %}</form>
-
-<!-- SECTION 1: THE LIBRARY GRID -->
-<div id="book-grid-container" class="card book-grid-container">
-    <h2>📚 Choose a Book to Research</h2>
-    <p>Click on a book to start your research session.</p>
-    
-    <div class="book-grid">
-        {% for book in books %}
-        <div class="book-card" data-book-id="{{ book.id }}" data-title="{{ book.title }}" data-author="{{ book.author }}">
-            <img src="{{ book.cover_url }}" alt="{{ book.title }}" class="book-cover" onerror="this.src='https://via.placeholder.com/150x200?text=No+Cover'">
-            <div class="book-info">
-                <p class="book-title">{{ book.title }}</p>
-                <p class="book-author">{{ book.author }}</p>
-            </div>
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Reading Library</h1>
+            <p class="text-slate-500 text-sm mt-1">Select a book to view details and begin your research session.</p>
         </div>
-        {% empty %}
-        <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
-            <h3>📚 You've read all available books!</h3>
-            <p>Ask your teacher/admin to fetch more books from the library, or keep reviewing your past summaries for extra practice.</p>
-        </div>
-        {% endfor %}
-    </div>
-</div>
-
-<!-- SECTION 2: THE RESEARCH & PASTE VIEW -->
-<div id="reading-view" class="card reading-view">
-    <button id="back-to-grid-btn" class="btn" style="background:#6e8efb; margin-bottom:20px;">← Back to Library</button>
-    
-    <h2 id="rv-title">Book Title</h2>
-    <p id="rv-author" style="color:#666; font-style: italic; margin-bottom:20px;">by Author</p>
-    
-    <!-- Link to read the book externally -->
-    <div style="text-align:center; margin-bottom: 30px;">
-        <a id="rv-external-link" href="#" target="_blank" class="btn" style="background:#2ecc71; text-decoration:none;">
-            🔗 Open Book on Open Library (Read/Browse Here)
+        <a href="{% url 'dashboard' %}" class="text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            Back to Dashboard
         </a>
     </div>
 
-    <!-- Text area to paste the summary -->
-    <h3>📝 Paste Your Summary Below</h3>
-    <p style="color:#666; font-size:0.9rem;">Read the book externally, then write or paste your summary here. (Minimum 100 characters to ensure quality!)</p>
-    <textarea id="pasted-summary" rows="8" style="width:100%; padding:15px; font-size:1rem; border-radius:10px; border:2px solid #ddd; margin-bottom:20px; box-sizing:border-box;" placeholder="Paste your summary here..."></textarea>
-    
-    <div style="text-align:center;">
-        <button id="submit-summary-btn" class="btn">Submit Summary & Claim Reward</button>
+    <!-- BOOK GRID -->
+    <div id="book-grid-container">
+        {% if books %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {% for book in books %}
+            <a href="{% url 'book_detail' book.id %}" class="book-card group bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 block overflow-hidden">
+                <div class="relative aspect-[2/3] bg-slate-100 overflow-hidden">
+                    <img src="{{ book.cover_url }}" alt="{{ book.title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://placehold.co/300x450/e2e8f0/94a3b8?text=No+Cover'">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                        <span class="text-white text-xs font-bold uppercase tracking-wider bg-white/20 backdrop-blur-sm px-2 py-1 rounded">View Details</span>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-sm font-bold text-slate-800 leading-snug line-clamp-2">{{ book.title }}</h3>
+                    <p class="text-xs text-slate-500 mt-1">{{ book.author }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="bg-white rounded-2xl border border-slate-200 p-12 text-center">
+            <h3 class="text-lg font-bold text-slate-800">Library Temporarily Empty</h3>
+            <p class="text-slate-500 mt-2">You've completed all available books.</p>
+        </div>
+        {% endif %}
     </div>
-</div>
-
-<div class="card" style="text-align:center;">
-    <a href="{% url 'dashboard' %}" style="color: #6e8efb;">← Back to Dashboard</a>
 </div>
 {% endblock %}

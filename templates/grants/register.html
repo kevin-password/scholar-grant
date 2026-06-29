@@ -13,17 +13,26 @@
     
     <form method="POST">
         {% csrf_token %}
+        
         <label style="font-weight:bold;">Username:</label>
-        <input type="text" name="username" required style="width:100%; padding:10px; margin-bottom:15px; border-radius:5px; border:1px solid #ddd; box-sizing:border-box;">
+        <input type="text" name="username" required style="width:100%; padding:10px; margin-bottom:15px; border-radius:5px; border:1px solid #ddd; box-sizing:border-box;" placeholder="Your username">
+        
+        <label style="font-weight:bold;">Email Address:</label>
+        <input type="email" name="email" required style="width:100%; padding:10px; margin-bottom:15px; border-radius:5px; border:1px solid #ddd; box-sizing:border-box;" placeholder="you@example.com">
+        
+        <!-- NEW: VIRAL REFERRAL CODE FIELD -->
+        <label style="font-weight:bold;">Referral Code <span style="color:#999; font-weight:normal; font-size:0.9em;">(Optional)</span>:</label>
+        <input type="text" name="referral_code" style="width:100%; padding:10px; margin-bottom:5px; border-radius:5px; border:1px solid #ddd; box-sizing:border-box; text-transform: uppercase; letter-spacing: 1px;" placeholder="e.g., A1B2C3D4">
+        <p style="font-size:0.8em; color:#666; margin-top:0; margin-bottom:15px;">Got a referral code? Enter it to link your account and start earning!</p>
         
         <label style="font-weight:bold;">Password:</label>
-        <input type="password" name="password" required style="width:100%; padding:10px; margin-bottom:20px; border-radius:5px; border:1px solid #ddd; box-sizing:border-box;">
+        <input type="password" name="password" required style="width:100%; padding:10px; margin-bottom:20px; border-radius:5px; border:1px solid #ddd; box-sizing:border-box;" placeholder="Choose a strong password">
         
         <button type="submit" class="btn" style="width:100%;">Sign Up & Choose Track</button>
     </form>
     
     <p style="text-align:center; margin-top:20px; font-size:0.9rem;">
-        Already have an account? <a href="/admin/" style="color:#6e8efb;">Login here</a>
+        Already have an account? <a href="{% url 'login' %}" style="color:#6e8efb;">Login here</a>
     </p>
 </div>
 {% endblock %}

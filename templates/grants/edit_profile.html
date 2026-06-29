@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    
+    <!-- Header -->
+    <div class="mb-8">
+        <a href="{% url 'student_profile' %}" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-800 transition mb-4">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            Back to Profile
+        </a>
+        <h1 class="text-3xl font-bold text-slate-900">Account Settings</h1>
+        <p class="text-slate-600 mt-2">Manage your security and account details.</p>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="mb-6 p-4 rounded-xl border {% if message.tags == 'error' %}bg-red-50 border-red-200 text-red-800{% else %}bg-emerald-50 border-emerald-200 text-emerald-800{% endif %}">
+                <p class="text-sm font-medium">{{ message }}</p>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Change Password Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+        <div class="flex items-center gap-3 mb-6 pb-6 border-b border-slate-100">
+            <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-slate-900">Change Password</h2>
+                <p class="text-sm text-slate-500">Ensure your account is using a strong, secure password.</p>
+            </div>
+        </div>
+
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Old Password -->
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-2">Current Password</label>
+                <input type="password" name="old_password" required 
+                       class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                       placeholder="Enter your current password">
+                {% if form.old_password.errors %}
+                    <p class="mt-2 text-xs text-red-600">{{ form.old_password.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- New Password -->
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-2">New Password</label>
+                <input type="password" name="new_password1" required 
+                       class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                       placeholder="Enter a strong new password">
+                {% if form.new_password1.errors %}
+                    <div class="mt-2 text-xs text-red-600">
+                        <p>{{ form.new_password1.errors.0 }}</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Confirm New Password -->
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-2">Confirm New Password</label>
+                <input type="password" name="new_password2" required 
+                       class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                       placeholder="Re-enter your new password">
+                {% if form.new_password2.errors %}
+                    <p class="mt-2 text-xs text-red-600">{{ form.new_password2.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="pt-4 flex justify-end gap-3">
+                <a href="{% url 'student_profile' %}" class="px-6 py-3 bg-white border border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition">Cancel</a>
+                <button type="submit" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 transition-all">
+                    Save New Password
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Danger Zone (Placeholder for future features) -->
+    <div class="mt-8 bg-white rounded-2xl shadow-sm border border-red-100 p-8">
+        <h3 class="text-lg font-bold text-red-600 mb-2">Danger Zone</h3>
+        <p class="text-sm text-slate-600 mb-4">Once you delete your account, there is no going back. All your reading history and earned UGX will be permanently lost.</p>
+        <button disabled class="px-4 py-2 bg-white border border-red-200 text-red-400 text-sm font-semibold rounded-lg cursor-not-allowed">
+            Delete Account (Coming Soon)
+        </button>
+    </div>
+
+</div>
+{% endblock %}

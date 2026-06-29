@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to ScholarGrants</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 40px 0;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%); padding: 40px 30px; text-align: center;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">Welcome to ScholarGrants! 🎓</h1>
+                            <p style="color: #dbeafe; margin: 10px 0 0 0; font-size: 16px;">Your journey to earning while reading starts now.</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 40px 30px;">
+                            <h2 style="color: #1e293b; margin: 0 0 20px 0; font-size: 22px;">Hi {{ user.username }},</h2>
+                            <p style="color: #475569; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+                                We are thrilled to have you on board! ScholarGrants is designed to turn your reading habits into real financial support for your university education.
+                            </p>
+                            
+                            <h3 style="color: #1e293b; margin: 30px 0 15px 0; font-size: 18px; font-weight: 600;">🚀 How to get started:</h3>
+                            
+                            <table cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 20px;">
+                                <tr>
+                                    <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9;">
+                                        <p style="color: #475569; font-size: 15px; margin: 0;"><strong style="color: #2563eb;">Step 1:</strong> Log in and choose your Reading Track (Bronze, Silver, or Gold).</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9;">
+                                        <p style="color: #475569; font-size: 15px; margin: 0;"><strong style="color: #2563eb;">Step 2:</strong> Pay your small refundable deposit to activate your track.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9;">
+                                        <p style="color: #475569; font-size: 15px; margin: 0;"><strong style="color: #2563eb;">Step 3:</strong> Read books, submit your summaries, and watch your UGX wallet grow!</p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="color: #475569; font-size: 16px; line-height: 1.6; margin: 20px 0 30px 0;">
+                                Remember, consistency is key! Read for 3 days in a row to unlock a <strong>1.5x earnings multiplier</strong>, and 7 days for a massive <strong>2x multiplier</strong>.
+                            </p>
+                            
+                            <!-- CTA Button -->
+                            <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
+                                <tr>
+                                    <td style="background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%); border-radius: 8px;">
+                                        <a href="http://127.0.0.1:8000/" 
+                                           style="display: inline-block; padding: 16px 40px; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600;">
+                                            Go to My Dashboard
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f8fafc; padding: 30px; text-align: center; border-top: 1px solid #e2e8f0;">
+                            <p style="color: #94a3b8; font-size: 13px; margin: 0 0 10px 0;">
+                                Need help? Reply to this email or visit our <a href="http://127.0.0.1:8000/contact/" style="color: #4f46e5; text-decoration: none;">Support Page</a>.
+                            </p>
+                            <p style="color: #94a3b8; font-size: 13px; margin: 0;">
+                                &copy; {% now "Y" %} ScholarGrants. Empowering scholars, one page at a time.
+                            </p>
+                        </td>
+                    </tr>
+                    
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
