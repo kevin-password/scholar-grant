@@ -11,8 +11,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-hc8mgtm+5^qs0ldt4$#e$o8-=rj5zhrhi#fp%p15*!w9+jha)e'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False  # MUST be False for live hosting
-ALLOWED_HOSTS = ['*']  # Allows anyone to visit your live URL
+# FIX 1: DEBUG MUST BE FALSE FOR LIVE HOSTING
+DEBUG = False  
+
+# FIX 2: ALLOW ONLY YOUR PYTHONANYWHERE DOMAIN AND LOCALHOST
+ALLOWED_HOSTS = ['ScholarGrantsUG.pythonanywhere.com', 'localhost', '127.0.0.1']
 
 # Application definition
 INSTALLED_APPS = [
