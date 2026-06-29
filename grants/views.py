@@ -9,25 +9,27 @@ from django.contrib.auth import update_session_auth_hash
 from django.db.models import Count
 import json
 import datetime
-import requests
-import random
 import time
 from decimal import Decimal
 
-# Email imports (Using standard send_mail for bulletproof plain text)
+# Email imports
 from django.core.mail import send_mail
 from django.conf import settings
 
-# Added ReferralCommission to the imports!
 from .models import ReadingTrack, StudentProfile, ReadingLog, WithdrawalRequest, Achievement, ReferralCommission
 from library.models import Book
+
+# --- HELPER FUNCTION TO CALCULATE DYNAMIC PAGE RATE ---
+def get_rate_per_page(profile):
+    if not profile.current_track:
+        return 0
+    # The new logic: Grant Amount / 50,000 pages (100 books * 500 pages)
+    return profile.current_track.total_grant_value / 50000
 
 @login_required
 def dashboard(request):
     profile, created = StudentProfile.objects.get_or_create(user=request.user)
     if not profile.current_track: return redirect('explore')
-    
-    # FIX: Only redirect to checkout if they haven't submitted a Transaction ID yet!
     if not profile.deposit_paid and not profile.deposit_transaction_id:
         return redirect('checkout_deposit', track_id=profile.current_track.id)
 
@@ -35,16 +37,16 @@ def dashboard(request):
     progress = (profile.total_earned / track.total_grant_value) * 100 if track.total_grant_value > 0 else 0
 
     recent_logs = ReadingLog.objects.filter(student=profile).order_by('-date_read')[:5]
-    for log in recent_logs: log.earned_ugx = log.pages_read * 1000
+    rate = get_rate_per_page(profile)
+    for log in recent_logs: log.earned_ugx = log.pages_read * rate
 
-    # Check if they are waiting for admin approval
     is_pending_approval = (not profile.deposit_paid and profile.deposit_transaction_id)
 
     return render(request, 'grants/dashboard.html', {
         'profile': profile, 
         'progress': min(progress, 100), 
         'recent_logs': recent_logs,
-        'is_pending_approval': is_pending_approval, # Pass this to the template
+        'is_pending_approval': is_pending_approval,
     })
 
 @login_required
@@ -67,7 +69,6 @@ def select_track(request):
 
 @login_required
 def checkout_deposit(request, track_id):
-    """The manual Mobile Money checkout page."""
     profile, created = StudentProfile.objects.get_or_create(user=request.user)
     track = ReadingTrack.objects.get(id=track_id)
     
@@ -91,10 +92,11 @@ def checkout_deposit(request, track_id):
 def reading_session(request):
     profile, created = StudentProfile.objects.get_or_create(user=request.user)
     
-    # --- 1. THE SMART AUTO-FETCHER (API) ---
-    # If we have fewer than 50 books, try to fetch more from the internet
+    # --- THE BULLETPROOF AUTO-FETCHER ENGINE ---
     if Book.objects.count() < 50:
         try:
+            import requests
+            import random
             topics = ['python programming', 'business finance', 'world history', 'psychology', 'science fiction', 'biography', 'self help']
             topic = random.choice(topics)
             url = f'https://openlibrary.org/search.json?q={topic}&limit=15&fields=title,author_name,first_sentence,number_of_pages_median,cover_i,subject'
@@ -104,21 +106,17 @@ def reading_session(request):
             
             for doc in data.get('docs', []):
                 title = doc.get('title', 'Unknown Title')
-                if Book.objects.filter(title=title).exists():
-                    continue
+                if Book.objects.filter(title=title).exists(): continue
                     
                 authors = doc.get('author_name', ['Unknown Author'])
                 author = authors[0] if authors else 'Unknown Author'
-                
                 cover_i = doc.get('cover_i')
                 cover_url = f'https://covers.openlibrary.org/b/id/{cover_i}-L.jpg' if cover_i else f"https://picsum.photos/seed/{title.replace(' ', '')}/300/450"
-                
                 first_sentence = doc.get('first_sentence', [])
                 description = f"A fascinating book about {topic}."
                 if first_sentence:
                     fs = first_sentence[0]
                     description = fs.get('value', description) if isinstance(fs, dict) else str(fs)
-                    
                 pages = doc.get('number_of_pages_median') or random.randint(150, 450)
                 subjects = doc.get('subject', [])
                 genre = ', '.join(subjects[:2]).title() if subjects else topic.title()
@@ -127,8 +125,6 @@ def reading_session(request):
         except Exception as e:
             print(f"API Auto-fetch skipped (Network issue): {e}")
 
-    # --- 2. THE BULLETPROOF FALLBACK (OFFLINE) ---
-    # If the API failed AND we still have 0 books, inject our master list of real books!
     if Book.objects.count() == 0:
         fallback_books = [
             {"title": "The Psychology of Money", "author": "Morgan Housel", "pages": 256, "genre": "Finance"},
@@ -149,19 +145,11 @@ def reading_session(request):
         ]
         for b in fallback_books:
             cover_url = f"https://picsum.photos/seed/{b['title'].replace(' ', '')}/300/450"
-            Book.objects.create(
-                title=b['title'], author=b['author'], pages=b['pages'], 
-                genre=b['genre'], cover_url=cover_url,
-                description=f"A highly rated, bestselling book by {b['author']}."
-            )
+            Book.objects.create(title=b['title'], author=b['author'], pages=b['pages'], genre=b['genre'], cover_url=cover_url, description=f"A highly rated, bestselling book by {b['author']}.")
         print("✅ Fallback triggered: 15 real books injected!")
 
-    # --- 3. SERVE THE BOOKS TO THE USER ---
     completed_book_ids = ReadingLog.objects.filter(student=profile, completed=True).values_list('book_id', flat=True)
-    
-    # Get 12 random books they haven't read yet
     books = Book.objects.exclude(id__in=completed_book_ids).order_by('?')[:12]
-        
     return render(request, 'grants/reading_session.html', {'profile': profile, 'books': books})
 
 @login_required
@@ -184,7 +172,10 @@ def submit_reading(request):
             profile.current_streak = profile.current_streak + 1 if profile.last_read_date == today - timezone.timedelta(days=1) else 1
             profile.last_read_date = today
 
-        base_reward = pages_read * 1000
+        # --- NEW DYNAMIC RATE LOGIC ---
+        rate_per_page = get_rate_per_page(profile)
+        base_reward = pages_read * rate_per_page
+        
         multiplier = 2.0 if profile.current_streak >= 7 else (1.5 if profile.current_streak >= 3 else 1.0)
         reward = Decimal(str(int(base_reward * multiplier)))
         
@@ -236,8 +227,10 @@ def admin_dashboard(request):
         
     pending_requests = WithdrawalRequest.objects.filter(status='Pending').select_related('student__user', 'student__current_track')
     for req in pending_requests:
+        # Calculate dynamic rate for the admin dashboard logs
+        rate = get_rate_per_page(req.student)
         logs = ReadingLog.objects.filter(student=req.student).order_by('-date_read')[:3]
-        for log in logs: log.earned_ugx = log.pages_read * 1000
+        for log in logs: log.earned_ugx = log.pages_read * rate
         req.recent_logs = logs
         
     pending_deposits = StudentProfile.objects.filter(deposit_paid=False, deposit_transaction_id__isnull=False).exclude(deposit_transaction_id='').select_related('user', 'current_track')
@@ -257,13 +250,13 @@ def process_withdrawal(request, request_id, action):
     
     if student_user.email:
         if action == 'approve':
-            subject = f"Your Withdrawal of UGX {withdrawal.amount:,.0f} has been Approved! 🎉"
-            message = f"Hi {student_user.username},\n\nGreat news! Our academic team has verified your reading summaries and approved your withdrawal request.\n\nAMOUNT SENT:\nUGX {withdrawal.amount:,.0f}\n\nThe funds have been dispatched to your registered Mobile Money number. Please allow up to 24 hours for the transaction to reflect on your phone.\n\nKeep up the excellent reading habits to unlock your next withdrawal!\n\nBest,\nThe ScholarGrants Team"
+            subject = f"Your Withdrawal of UGX {withdrawal.amount:,.0f} has been Approved! "
+            message = f"Hi {student_user.username},\n\nGreat news! Our academic team has verified your reading summaries and approved your withdrawal request.\n\nAMOUNT SENT:\nUGX {withdrawal.amount:,.0f}\n\nThe funds have been dispatched to your registered Mobile Money number. Please allow up to 24 hours for the transaction to reflect on your phone.\n\nKeep up the excellent reading habits to unlock your next withdrawal!\n\nBest,\nThe ScholarGrants Team\n\nLog in: https://ScholarGrantsUG.pythonanywhere.com/"
             send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [student_user.email], fail_silently=True)
             
         elif action == 'reject':
             subject = "Update on your Withdrawal Request"
-            message = f"Hi {student_user.username},\n\nOur academic team has reviewed your recent reading summaries for your withdrawal request of UGX {withdrawal.amount:,.0f}.\n\nUnfortunately, we were unable to approve this request at this time. This usually happens if the summaries provided do not sufficiently demonstrate comprehension of the reading material.\n\nDON'T WORRY:\nThe funds (UGX {withdrawal.amount:,.0f}) have been safely returned to your ScholarGrants wallet. You can request a withdrawal again once you have completed more reading sessions with detailed summaries.\n\nKeep reading, and we look forward to approving your next request!\n\nBest,\nThe ScholarGrants Team"
+            message = f"Hi {student_user.username},\n\nOur academic team has reviewed your recent reading summaries for your withdrawal request of UGX {withdrawal.amount:,.0f}.\n\nUnfortunately, we were unable to approve this request at this time. This usually happens if the summaries provided do not sufficiently demonstrate comprehension of the reading material.\n\nDON'T WORRY:\nThe funds (UGX {withdrawal.amount:,.0f}) have been safely returned to your ScholarGrants wallet. You can request a withdrawal again once you have completed more reading sessions with detailed summaries.\n\nKeep reading, and we look forward to approving your next request!\n\nBest,\nThe ScholarGrants Team\n\nLog in: https://ScholarGrantsUG.pythonanywhere.com/"
             send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [student_user.email], fail_silently=True)
 
     if action == 'approve':
@@ -280,7 +273,6 @@ def process_withdrawal(request, request_id, action):
 
 @login_required
 def approve_deposit(request, profile_id):
-    """Admin verifies deposit and triggers the 30-15-10 referral payouts."""
     if request.user.role != 'admin':
         return redirect('dashboard')
     
@@ -288,9 +280,8 @@ def approve_deposit(request, profile_id):
     profile.deposit_paid = True
     profile.save()
     
-    # --- VIRAL 30-15-10 COMMISSION ENGINE ---
     deposit_amount = profile.current_track.deposit_amount
-    current_level_profile = profile.referred_by # Start at Level 1 (Direct Referrer)
+    current_level_profile = profile.referred_by
     level = 1
     commission_rates = {1: 0.30, 2: 0.15, 3: 0.10}
 
@@ -299,20 +290,16 @@ def approve_deposit(request, profile_id):
         commission_amount = Decimal(str(deposit_amount * rate))
         
         if commission_amount > 0:
-            # Add to their wallet
             current_level_profile.wallet_balance += commission_amount
             current_level_profile.total_earned += commission_amount
             current_level_profile.save()
             
-            # Log the commission for their profile history
             ReferralCommission.objects.create(
                 beneficiary=current_level_profile,
                 from_user=profile,
                 amount=commission_amount,
                 level=level
             )
-            
-        # Move up the chain to the next level
         current_level_profile = current_level_profile.referred_by
         level += 1
 
@@ -328,7 +315,9 @@ def terms(request): return render(request, 'grants/terms.html')
 def student_profile(request):
     profile, created = StudentProfile.objects.get_or_create(user=request.user)
     reading_history = ReadingLog.objects.filter(student=profile).order_by('-date_read')
-    for log in reading_history: log.earned_ugx = log.pages_read * 1000
+    rate = get_rate_per_page(profile)
+    for log in reading_history: log.earned_ugx = log.pages_read * rate
+    
     achievements = Achievement.objects.filter(student=profile).order_by('-earned_date')
 
     end_date = timezone.now().date()
@@ -361,7 +350,10 @@ def edit_profile(request):
 def book_detail(request, book_id):
     book = get_object_or_404(Book, id=book_id)
     page_count = getattr(book, 'pages', 15)
-    book.earned_value = page_count * 1000 
+    rate = 20 # Default fallback for display purposes
+    if hasattr(book, 'student'): # Just in case
+        rate = get_rate_per_page(book.student)
+    book.earned_value = page_count * rate 
     return render(request, 'grants/book_detail.html', {'book': book, 'page_count': page_count})
 
 @login_required
