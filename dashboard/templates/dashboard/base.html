@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏛️ GOAT Life Monitor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #0a0a1a; color: #e5e5e5; }
+        .glass { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
+        .gold-text { background: linear-gradient(135deg, #f7971e, #ffd200); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nav-link:hover { color: #ffd200; }
+    </style>
+</head>
+<body>
+    <nav class="bg-gray-900/90 border-b border-gray-800 sticky top-0 z-50 backdrop-blur">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <a href="{% url 'dashboard:index' %}" class="text-2xl font-bold gold-text">🏛️ GOAT</a>
+                <div class="flex items-center gap-4">
+                    {% if user.is_authenticated %}
+                        <span class="text-gray-400 text-sm">{{ user.get_full_name }}</span>
+                        <a href="{% url 'accounts:profile' %}" class="nav-link text-gray-400 hover:text-white">👤</a>
+                        <a href="{% url 'accounts:logout' %}" class="nav-link text-gray-400 hover:text-red-400">🚪</a>
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}" class="nav-link text-gray-400 hover:text-white">Login</a>
+                        <a href="{% url 'accounts:register' %}" class="px-4 py-2 bg-yellow-500 rounded-lg text-gray-900 font-semibold">Get Started</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+    <main>
+        {% if messages %}
+            <div class="container mx-auto px-4 mt-4">
+                {% for message in messages %}
+                    <div class="p-4 rounded-lg {% if message.tags == 'success' %}bg-green-500/20 text-green-400 border border-green-500/30{% else %}bg-red-500/20 text-red-400 border border-red-500/30{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
