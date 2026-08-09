@@ -1,0 +1,47 @@
+{% extends 'dashboard/base.html' %}
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- Hero -->
+    <div class="bg-gradient-to-r from-yellow-900/20 to-yellow-700/10 rounded-2xl p-8 mb-8 border border-yellow-500/20">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-white">Welcome, {{ user.get_full_name }}! 👋</h1>
+                <p class="text-gray-400 mt-2">{{ profile.get_life_phase_display }}</p>
+            </div>
+            <div class="text-center">
+                <div class="text-5xl font-bold gold-text">{{ profile.overall_goat_score|floatformat:1 }}</div>
+                <p class="text-gray-400 text-sm">GOAT Score</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dimensions Grid -->
+    <h2 class="text-xl font-bold text-white mb-4">Your 10 Dimensions</h2>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        {% for dim in dimensions %}
+        <div class="glass rounded-xl p-4 hover:border-yellow-500/30 transition">
+            <div class="text-2xl">{{ dim.get_dimension_type_display|slice:":1" }}</div>
+            <div class="text-sm text-gray-300">{{ dim.get_dimension_type_display|truncatechars:12 }}</div>
+            <div class="text-xl font-bold text-yellow-400">{{ dim.score|floatformat:1 }}</div>
+            <div class="mt-2 bg-gray-700 rounded-full h-1.5 overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-yellow-500 to-yellow-400" style="width: {{ dim.score }}%"></div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Recent Activity -->
+    <h2 class="text-xl font-bold text-white mt-8 mb-4">Recent Activity</h2>
+    <div class="glass rounded-xl p-4">
+        {% for snapshot in recent_snapshots %}
+        <div class="flex justify-between items-center py-2 border-b border-gray-800/50">
+            <span class="text-gray-300">{{ snapshot.metric.icon }} {{ snapshot.metric.name }}</span>
+            <span class="text-white">{{ snapshot.value }} {{ snapshot.metric.unit }}</span>
+            <span class="text-gray-500 text-sm">{{ snapshot.timestamp|timesince }} ago</span>
+        </div>
+        {% empty %}
+        <p class="text-gray-400 text-center py-4">No metrics tracked yet. Start your journey!</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
